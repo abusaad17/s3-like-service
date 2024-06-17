@@ -16,9 +16,9 @@ exports.BucketService = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose = require("mongoose");
 const mongoose_1 = require("@nestjs/mongoose");
-const bucket_model_1 = require("src/auth/schemas/bucket.model");
-const user_model_1 = require("src/auth/schemas/user.model");
-const file_model_1 = require("src/auth/schemas/file.model");
+const bucket_model_1 = require("../auth/schemas/bucket.model");
+const user_model_1 = require("../auth/schemas/user.model");
+const file_model_1 = require("../auth/schemas/file.model");
 const mongodb_1 = require("mongodb");
 let BucketService = class BucketService {
     constructor(bucketModel, userModel, fileModel) {
@@ -27,18 +27,26 @@ let BucketService = class BucketService {
         this.fileModel = fileModel;
     }
     async createBucket(createBucketDto, userId) {
-        const existingBucket = await this.bucketModel.findOne({
-            name: createBucketDto.bucketName,
-        });
-        if (createBucketDto.bucketName === '') {
+        if (createBucketDto.bucketName === '' || createBucketDto.description === '') {
             return {
                 status: 400,
                 error: 'BAD_REQUEST',
-                message: 'Buckets name can not be empty',
+                message: 'Invalid or missing bucket name or description',
                 data: null,
             };
         }
-        if (existingBucket !== null && !existingBucket.isDelete) {
+        const existingBucket = await this.bucketModel.findOne({
+            name: createBucketDto.bucketName,
+        });
+        if (existingBucket?.isDelete) {
+            return {
+                status: 400,
+                error: 'BAD_REQUEST',
+                message: 'Bucket previously deleted',
+                data: null,
+            };
+        }
+        if (existingBucket !== null) {
             return {
                 status: 400,
                 error: 'BAD_REQUEST',
@@ -63,7 +71,7 @@ let BucketService = class BucketService {
             isDelete: false,
         });
         const bucket = await newBucket.save();
-        user.buckets.push(bucket._id);
+        user.buckets.push(bucket._id.toString());
         await user.save();
         return {
             status: 201,
@@ -160,6 +168,14 @@ let BucketService = class BucketService {
                 data: null,
             };
         }
+        if (!file) {
+            return {
+                status: 400,
+                error: '',
+                message: 'File not found',
+                data: null,
+            };
+        }
         const newFile = new this.fileModel({
             name: file.filename,
             bucketId: bucket._id.toString(),
@@ -167,7 +183,7 @@ let BucketService = class BucketService {
             isDelete: false,
         });
         const savedFile = await newFile.save();
-        bucket.files.push(savedFile.path);
+        bucket.files.push(filePath);
         await bucket.save();
         return {
             status: 200,

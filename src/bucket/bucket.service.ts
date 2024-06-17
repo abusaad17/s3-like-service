@@ -20,18 +20,26 @@ export class BucketService {
     createBucketDto: CreateBucketDto,
     userId: string,
   ): Promise<any> {
-    const existingBucket = await this.bucketModel.findOne({
-      name: createBucketDto.bucketName,
-    });
-    if (createBucketDto.bucketName === '') {
+    if(createBucketDto.bucketName === '' || createBucketDto.description === ''){
       return {
         status: 400,
         error: 'BAD_REQUEST',
-        message: 'Buckets name can not be empty',
+        message: 'Invalid or missing bucket name or description',
         data: null,
       };
     }
-    if (existingBucket !== null && !existingBucket.isDelete) {
+    const existingBucket = await this.bucketModel.findOne({
+      name: createBucketDto.bucketName,
+    });
+    if(existingBucket?.isDelete){
+      return {
+        status: 400,
+        error: 'BAD_REQUEST',
+        message: 'Bucket previously deleted',
+        data: null,
+      };
+    }
+    if (existingBucket !== null) {
       return {
         status: 400,
         error: 'BAD_REQUEST',
@@ -56,7 +64,7 @@ export class BucketService {
       isDelete: false,
     });
     const bucket = await newBucket.save();
-    user.buckets.push(bucket._id);
+    user.buckets.push(bucket._id.toString());
     await user.save();
     return {
       status: 201,
@@ -163,7 +171,14 @@ export class BucketService {
         data: null,
       };
     }
-    //check if the file exists and is already uploaded
+    if (!file) {
+      return {
+        status: 400,
+        error: '',
+        message: 'File not found',
+        data: null,
+      };
+    }
     const newFile = new this.fileModel({
       name: file.filename,
       bucketId: bucket._id.toString(),
@@ -171,7 +186,7 @@ export class BucketService {
       isDelete: false,
     });
     const savedFile = await newFile.save();
-    bucket.files.push(savedFile.path);
+    bucket.files.push(filePath);
     await bucket.save();
     return {
       status: 200,
