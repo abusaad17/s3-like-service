@@ -1,0 +1,1 @@
+{"version":3,"file":"create-bucket.dto.js","sourceRoot":"","sources":["../../../src/bucket/dto/create-bucket.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,6CAA8C;AAE9C,MAAa,eAAe;CAY3B;AAZD,0CAYC;AAPU;IAJR,IAAA,qBAAW,EAAC;QACX,WAAW,EAAE,qCAAqC;QAClD,OAAO,EAAE,WAAW;KACrB,CAAC;;mDAC0B;AAMnB;IAJR,IAAA,qBAAW,EAAC;QACX,WAAW,EAAE,0BAA0B;QACvC,OAAO,EAAE,WAAW;KACrB,CAAC;;oDAC2B"}
