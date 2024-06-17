@@ -12,9 +12,9 @@ const bucket_controller_1 = require("./bucket.controller");
 const bucket_service_1 = require("./bucket.service");
 const mongoose_1 = require("@nestjs/mongoose");
 const jwt_middleware_1 = require("../auth/middleware/jwt-middleware");
-const user_model_1 = require("../auth/schemas/user.model");
-const bucket_model_1 = require("../auth/schemas/bucket.model");
-const file_model_1 = require("../auth/schemas/file.model");
+const user_model_1 = require("src/auth/schemas/user.model");
+const bucket_model_1 = require("src/auth/schemas/bucket.model");
+const file_model_1 = require("src/auth/schemas/file.model");
 const jwt_1 = require("@nestjs/jwt");
 let BucketModule = class BucketModule {
     configure(consumer) {

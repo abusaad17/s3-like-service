@@ -16,9 +16,9 @@ exports.BucketService = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose = require("mongoose");
 const mongoose_1 = require("@nestjs/mongoose");
-const bucket_model_1 = require("../auth/schemas/bucket.model");
-const user_model_1 = require("../auth/schemas/user.model");
-const file_model_1 = require("../auth/schemas/file.model");
+const bucket_model_1 = require("src/auth/schemas/bucket.model");
+const user_model_1 = require("src/auth/schemas/user.model");
+const file_model_1 = require("src/auth/schemas/file.model");
 const mongodb_1 = require("mongodb");
 let BucketService = class BucketService {
     constructor(bucketModel, userModel, fileModel) {
