@@ -37,7 +37,7 @@ export declare class BucketService {
     deleteBucket(userId: string, bucketId: string): Promise<any>;
     listBucket(userId: string, page: number, limit: number): Promise<any>;
     uploadFile(bucketId: string, file: MulterFile, filePath: string): Promise<any>;
-    getFileById(fileId: string): Promise<any>;
+    getFileByFileId(fileId: string, userId: string): Promise<any>;
     deleteFile(fileId: string): Promise<any>;
-    getFileByBucketName(bucketId: string): Promise<any>;
+    getFileByBucketId(bucketId: string): Promise<any>;
 }

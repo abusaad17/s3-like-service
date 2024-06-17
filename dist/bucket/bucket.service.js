@@ -130,7 +130,7 @@ let BucketService = class BucketService {
                 data: null,
             };
         }
-        const totalBuckets = await this.bucketModel.countDocuments({ userId });
+        const totalBuckets = await this.bucketModel.countDocuments({ userId, isDelete: false });
         const userBuckets = await this.bucketModel
             .find({ userId, isDelete: false })
             .skip((page - 1) * limit)
@@ -160,11 +160,11 @@ let BucketService = class BucketService {
     }
     async uploadFile(bucketId, file, filePath) {
         const bucket = await this.bucketModel.findById(bucketId);
-        if (!bucket) {
+        if (!bucket || bucket.isDelete) {
             return {
                 status: 400,
                 error: '',
-                message: 'Bucket not found',
+                message: 'Bucket not found or might be deleted',
                 data: null,
             };
         }
@@ -192,17 +192,40 @@ let BucketService = class BucketService {
             filePath: savedFile.path,
         };
     }
-    async getFileById(fileId) {
+    async getFileByFileId(fileId, userId) {
+        const existingFile = await this.fileModel.findById(fileId);
+        const existingBucket = await this.bucketModel.findById(existingFile?.bucketId);
+        if (existingBucket.userId !== userId) {
+            return {
+                status: 400,
+                error: '',
+                message: 'The requested file belongs to another user',
+                data: null,
+            };
+        }
+        if (existingBucket?.isDelete) {
+            return {
+                status: 400,
+                error: '',
+                message: 'This bucket is already deleted',
+                data: null,
+            };
+        }
         const file = await this.fileModel.findById(fileId);
         if (!file || file.isDelete) {
             return {
                 status: 400,
                 error: '',
-                message: 'Bucket already deleted ',
+                message: 'File already deleted or not found',
                 data: null,
             };
         }
-        return file;
+        return {
+            status: 200,
+            error: '',
+            message: 'File retreived successfully',
+            data: file,
+        };
     }
     async deleteFile(fileId) {
         const file = await this.fileModel.findById(new mongodb_1.ObjectId(fileId));
@@ -224,10 +247,24 @@ let BucketService = class BucketService {
             filePath: file.path,
         };
     }
-    async getFileByBucketName(bucketId) {
-        const file = await this.fileModel.find({ bucketId: bucketId });
-        if (!file) {
-            throw new Error('File not found');
+    async getFileByBucketId(bucketId) {
+        const existingBucket = await this.bucketModel.findById(bucketId);
+        if (existingBucket.isDelete) {
+            return {
+                status: 400,
+                error: '',
+                message: 'This bucket is already deleted',
+                data: null,
+            };
+        }
+        const file = await this.fileModel.find({ bucketId: bucketId, isDelete: false });
+        if (file.length === 0) {
+            return {
+                status: 400,
+                error: '',
+                message: 'This bucket has no files',
+                data: null,
+            };
         }
         const data = file.map((obj) => {
             const res = {
@@ -241,6 +278,7 @@ let BucketService = class BucketService {
             status: 200,
             error: '',
             data: data,
+            message: 'Files retreived successfully'
         };
     }
 };

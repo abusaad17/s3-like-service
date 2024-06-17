@@ -1,6 +1,6 @@
-import { BucketService } from './bucket.service';
-import { MulterFile } from './multer-file.interface';
-import { CreateBucketDto } from './dto/create-bucket.dto';
+import { BucketService } from "./bucket.service";
+import { MulterFile } from "./multer-file.interface";
+import { CreateBucketDto } from "./dto/create-bucket.dto";
 export declare class BucketController {
     private readonly bucketService;
     constructor(bucketService: BucketService);
@@ -9,6 +9,6 @@ export declare class BucketController {
     listBucket(req: any, res: any, page?: number, limit?: number): Promise<any>;
     uploadFile(bucketId: string, file: MulterFile, res: any): Promise<any>;
     deleteFile(fileId: string, res: any): Promise<void>;
-    getFileById(fileId: string, res: any): Promise<any>;
-    getFileByBucketName(bucketId: string, res: any): Promise<void>;
+    getFileById(fileId: string, res: any, req: any): Promise<any>;
+    getFileByBucketName(bucketId: string, res: any): Promise<any>;
 }

@@ -26,7 +26,7 @@ let BucketController = class BucketController {
     }
     async createBucket(createBucketDto, req, res) {
         try {
-            const userId = req.headers['userId'];
+            const userId = req.headers["userId"];
             const response = await this.bucketService.createBucket(createBucketDto, userId);
             switch (response.status) {
                 case 201:
@@ -43,23 +43,23 @@ let BucketController = class BucketController {
                 default:
                     return res.status(common_1.HttpStatus.INTERNAL_SERVER_ERROR).json({
                         status: 500,
-                        error: 'Something went wrong',
-                        message: 'Something went wrong, please try again',
+                        error: "Something went wrong",
+                        message: "Something went wrong, please try again",
                     });
             }
         }
         catch (error) {
-            console.error('Error creating bucket:', error);
+            console.error("Error creating bucket:", error);
             return res.status(common_1.HttpStatus.INTERNAL_SERVER_ERROR).json({
                 status: 500,
-                error: 'Something went wrong',
-                message: 'Something went wrong, please try again',
+                error: "Something went wrong",
+                message: "Something went wrong, please try again",
             });
         }
     }
     async deleteBucket(bucketId, req, res) {
         try {
-            const userId = req.headers['userId'];
+            const userId = req.headers["userId"];
             const response = await this.bucketService.deleteBucket(userId, bucketId);
             switch (response.status) {
                 case 200:
@@ -79,28 +79,28 @@ let BucketController = class BucketController {
                 default:
                     return res.status(common_1.HttpStatus.INTERNAL_SERVER_ERROR).json({
                         status: 500,
-                        error: 'Something went wrong',
-                        message: 'Something went wrong, please try again',
+                        error: "Something went wrong",
+                        message: "Something went wrong, please try again",
                         data: null,
                     });
             }
         }
         catch (error) {
-            console.error('Error creating bucket:', error);
+            console.error("Error creating bucket:", error);
             return res.status(common_1.HttpStatus.INTERNAL_SERVER_ERROR).json({
                 status: 500,
-                error: 'Something went wrong',
-                message: 'Something went wrong, please try again',
+                error: "Something went wrong",
+                message: "Something went wrong, please try again",
             });
         }
     }
     async listBucket(req, res, page = 1, limit = 10) {
         try {
-            const userId = req.headers['userId'];
+            const userId = req.headers["userId"];
             const response = await this.bucketService.listBucket(userId, page, limit);
             if (response.status === 200) {
                 return res.status(common_1.HttpStatus.OK).json({
-                    error: '',
+                    error: "",
                     data: response.data,
                     page: response.page,
                     limit: response.limit,
@@ -109,22 +109,22 @@ let BucketController = class BucketController {
             }
             if (response.status === 400) {
                 return res.status(common_1.HttpStatus.BAD_REQUEST).json({
-                    error: '',
+                    error: "",
                     message: response.message,
                 });
             }
         }
         catch (error) {
-            console.error('Error creating bucket:', error);
+            console.error("Error creating bucket:", error);
             return res.status(common_1.HttpStatus.CONFLICT).json({
                 status: 500,
-                error: 'Something went wrong',
-                message: 'Something went wrong, please try again',
+                error: "Something went wrong",
+                message: "Something went wrong, please try again",
             });
         }
     }
     async uploadFile(bucketId, file, res) {
-        const filePath = (0, path_1.join)(__dirname, '../../uploads', file.filename);
+        const filePath = (0, path_1.join)(__dirname, "../../uploads", file.filename);
         console.log(filePath);
         const response = await this.bucketService.uploadFile(bucketId, file, filePath);
         switch (response.status) {
@@ -145,8 +145,8 @@ let BucketController = class BucketController {
             default:
                 return res.status(common_1.HttpStatus.INTERNAL_SERVER_ERROR).json({
                     status: 500,
-                    error: 'Something went wrong',
-                    message: 'Something went wrong, please try again',
+                    error: "Something went wrong",
+                    message: "Something went wrong, please try again",
                     data: null,
                 });
         }
@@ -155,21 +155,63 @@ let BucketController = class BucketController {
         const file = await this.bucketService.deleteFile(fileId);
         res.sendFile(file.filePath);
     }
-    async getFileById(fileId, res) {
-        const response = await this.bucketService.getFileById(fileId);
-        if (response.status === 400) {
-            return res.status(400).send(response.message);
+    async getFileById(fileId, res, req) {
+        const userId = req.headers["userId"];
+        const response = await this.bucketService.getFileByFileId(fileId, userId);
+        switch (response.status) {
+            case 200:
+                return res.status(common_1.HttpStatus.OK).json({
+                    status: response.status,
+                    error: response.error,
+                    message: response.message,
+                    data: response.data,
+                });
+            case 400:
+                return res.status(common_1.HttpStatus.BAD_REQUEST).json({
+                    error: response.error,
+                    message: response.message,
+                    status: response.status,
+                    data: response.data,
+                });
+            default:
+                return res.status(common_1.HttpStatus.INTERNAL_SERVER_ERROR).json({
+                    status: 500,
+                    error: "Something went wrong",
+                    message: "Something went wrong, please try again",
+                    data: null,
+                });
         }
-        res.sendFile(response.path);
     }
     async getFileByBucketName(bucketId, res) {
-        const file = await this.bucketService.getFileByBucketName(bucketId);
-        res.send(file);
+        const response = await this.bucketService.getFileByBucketId(bucketId);
+        switch (response.status) {
+            case 200:
+                return res.status(common_1.HttpStatus.OK).json({
+                    status: response.status,
+                    error: response.error,
+                    message: response.message,
+                    data: response.data,
+                });
+            case 400:
+                return res.status(common_1.HttpStatus.BAD_REQUEST).json({
+                    error: response.error,
+                    message: response.message,
+                    status: response.status,
+                    data: response.data,
+                });
+            default:
+                return res.status(common_1.HttpStatus.INTERNAL_SERVER_ERROR).json({
+                    status: 500,
+                    error: "Something went wrong",
+                    message: "Something went wrong, please try again",
+                    data: null,
+                });
+        }
     }
 };
 exports.BucketController = BucketController;
 __decorate([
-    (0, common_1.Post)('bucket'),
+    (0, common_1.Post)("bucket"),
     (0, swagger_1.ApiBearerAuth)(),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Req)()),
@@ -179,9 +221,9 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BucketController.prototype, "createBucket", null);
 __decorate([
-    (0, common_1.Delete)('bucket/:bucketId'),
+    (0, common_1.Delete)("bucket/:bucketId"),
     (0, swagger_1.ApiBearerAuth)(),
-    __param(0, (0, common_1.Param)('bucketId')),
+    __param(0, (0, common_1.Param)("bucketId")),
     __param(1, (0, common_1.Req)()),
     __param(2, (0, common_1.Res)()),
     __metadata("design:type", Function),
@@ -189,49 +231,49 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BucketController.prototype, "deleteBucket", null);
 __decorate([
-    (0, common_1.Get)('bucket'),
+    (0, common_1.Get)("bucket"),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiQuery)({ name: 'page', required: false, type: Number }),
-    (0, swagger_1.ApiQuery)({ name: 'limit', required: false, type: Number }),
+    (0, swagger_1.ApiQuery)({ name: "page", required: false, type: Number }),
+    (0, swagger_1.ApiQuery)({ name: "limit", required: false, type: Number }),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Res)()),
-    __param(2, (0, common_1.Query)('page')),
-    __param(3, (0, common_1.Query)('limit')),
+    __param(2, (0, common_1.Query)("page")),
+    __param(3, (0, common_1.Query)("limit")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, Object, Number, Number]),
     __metadata("design:returntype", Promise)
 ], BucketController.prototype, "listBucket", null);
 __decorate([
-    (0, common_1.Put)('upload/:bucketId'),
+    (0, common_1.Put)("upload/:bucketId"),
     (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file', {
+    (0, swagger_1.ApiConsumes)("multipart/form-data"),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
         storage: (0, multer_1.diskStorage)({
-            destination: './uploads',
+            destination: "./uploads",
             filename: (req, file, cb) => {
                 const randomName = Array(32)
                     .fill(null)
                     .map(() => Math.round(Math.random() * 16).toString(16))
-                    .join('');
+                    .join("");
                 cb(null, `${randomName}${(0, path_1.extname)(file.originalname)}`);
             },
         }),
     })),
     (0, swagger_1.ApiBody)({
-        description: 'File upload',
+        description: "File upload",
         required: true,
-        type: 'multipart/form-data',
+        type: "multipart/form-data",
         schema: {
-            type: 'object',
+            type: "object",
             properties: {
                 file: {
-                    type: 'string',
-                    format: 'binary',
+                    type: "string",
+                    format: "binary",
                 },
             },
         },
     }),
-    __param(0, (0, common_1.Param)('bucketId')),
+    __param(0, (0, common_1.Param)("bucketId")),
     __param(1, (0, common_1.UploadedFile)()),
     __param(2, (0, common_1.Res)()),
     __metadata("design:type", Function),
@@ -239,35 +281,36 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BucketController.prototype, "uploadFile", null);
 __decorate([
-    (0, common_1.Delete)('/:fileId'),
+    (0, common_1.Delete)("file/:fileId"),
     (0, swagger_1.ApiBearerAuth)(),
-    __param(0, (0, common_1.Param)('fileId')),
+    __param(0, (0, common_1.Param)("fileId")),
     __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], BucketController.prototype, "deleteFile", null);
 __decorate([
-    (0, common_1.Get)('/:fileId'),
+    (0, common_1.Get)("file/:fileId"),
     (0, swagger_1.ApiBearerAuth)(),
-    __param(0, (0, common_1.Param)('fileId')),
+    __param(0, (0, common_1.Param)("fileId")),
     __param(1, (0, common_1.Res)()),
+    __param(2, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], BucketController.prototype, "getFileById", null);
 __decorate([
-    (0, common_1.Get)('files/:bucketId'),
+    (0, common_1.Get)("getfile/:bucketId"),
     (0, swagger_1.ApiBearerAuth)(),
-    __param(0, (0, common_1.Param)('bucketId')),
+    __param(0, (0, common_1.Param)("bucketId")),
     __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], BucketController.prototype, "getFileByBucketName", null);
 exports.BucketController = BucketController = __decorate([
-    (0, swagger_1.ApiTags)('CRUD APIs for buckets and files'),
-    (0, common_1.Controller)('v1/api'),
+    (0, swagger_1.ApiTags)("CRUD APIs for buckets and files"),
+    (0, common_1.Controller)("v1/api"),
     __metadata("design:paramtypes", [bucket_service_1.BucketService])
 ], BucketController);
 //# sourceMappingURL=bucket.controller.js.map

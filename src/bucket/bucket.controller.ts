@@ -12,39 +12,39 @@ import {
   Res,
   UploadedFile,
   UseInterceptors,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiQuery,
   ApiTags,
-} from '@nestjs/swagger';
-import { BucketService } from './bucket.service';
-import { extname, join } from 'path';
-import { MulterFile } from './multer-file.interface';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { CreateBucketDto } from './dto/create-bucket.dto';
+} from "@nestjs/swagger";
+import { BucketService } from "./bucket.service";
+import { extname, join } from "path";
+import { MulterFile } from "./multer-file.interface";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { diskStorage } from "multer";
+import { CreateBucketDto } from "./dto/create-bucket.dto";
 
-@ApiTags('CRUD APIs for buckets and files')
-@Controller('v1/api')
+@ApiTags("CRUD APIs for buckets and files")
+@Controller("v1/api")
 export class BucketController {
   constructor(private readonly bucketService: BucketService) {}
 
   //************BUCKET-CRUD-API**************** */
-  @Post('bucket') // Create a new bucket
+  @Post("bucket") // Create a new bucket
   @ApiBearerAuth()
   async createBucket(
     @Body() createBucketDto: CreateBucketDto,
     @Req() req: any,
-    @Res() res: any,
+    @Res() res: any
   ) {
     try {
-      const userId = req.headers['userId'];
+      const userId = req.headers["userId"];
       const response = await this.bucketService.createBucket(
         createBucketDto,
-        userId,
+        userId
       );
       switch (response.status) {
         case 201:
@@ -61,29 +61,29 @@ export class BucketController {
         default:
           return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
             status: 500,
-            error: 'Something went wrong',
-            message: 'Something went wrong, please try again',
+            error: "Something went wrong",
+            message: "Something went wrong, please try again",
           });
       }
     } catch (error) {
-      console.error('Error creating bucket:', error);
+      console.error("Error creating bucket:", error);
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         status: 500,
-        error: 'Something went wrong',
-        message: 'Something went wrong, please try again',
+        error: "Something went wrong",
+        message: "Something went wrong, please try again",
       });
     }
   }
 
-  @Delete('bucket/:bucketId') // Delete a bucket
+  @Delete("bucket/:bucketId") // Delete a bucket
   @ApiBearerAuth()
   async deleteBucket(
-    @Param('bucketId') bucketId: string,
+    @Param("bucketId") bucketId: string,
     @Req() req: any,
-    @Res() res: any,
+    @Res() res: any
   ): Promise<any> {
     try {
-      const userId = req.headers['userId'];
+      const userId = req.headers["userId"];
       const response = await this.bucketService.deleteBucket(userId, bucketId);
       switch (response.status) {
         case 200:
@@ -103,37 +103,37 @@ export class BucketController {
         default:
           return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
             status: 500,
-            error: 'Something went wrong',
-            message: 'Something went wrong, please try again',
+            error: "Something went wrong",
+            message: "Something went wrong, please try again",
             data: null,
           });
       }
     } catch (error) {
-      console.error('Error creating bucket:', error);
+      console.error("Error creating bucket:", error);
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         status: 500,
-        error: 'Something went wrong',
-        message: 'Something went wrong, please try again',
+        error: "Something went wrong",
+        message: "Something went wrong, please try again",
       });
     }
   }
 
-  @Get('bucket') // Get a bucket list with pagination
+  @Get("bucket") // Get a bucket list with pagination
   @ApiBearerAuth()
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: "page", required: false, type: Number })
+  @ApiQuery({ name: "limit", required: false, type: Number })
   async listBucket(
     @Req() req: any,
     @Res() res: any,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 10
   ): Promise<any> {
     try {
-      const userId = req.headers['userId'];
+      const userId = req.headers["userId"];
       const response = await this.bucketService.listBucket(userId, page, limit);
       if (response.status === 200) {
         return res.status(HttpStatus.OK).json({
-          error: '',
+          error: "",
           data: response.data,
           page: response.page,
           limit: response.limit,
@@ -142,16 +142,16 @@ export class BucketController {
       }
       if (response.status === 400) {
         return res.status(HttpStatus.BAD_REQUEST).json({
-          error: '',
+          error: "",
           message: response.message,
         });
       }
     } catch (error) {
-      console.error('Error creating bucket:', error);
+      console.error("Error creating bucket:", error);
       return res.status(HttpStatus.CONFLICT).json({
         status: 500,
-        error: 'Something went wrong',
-        message: 'Something went wrong, please try again',
+        error: "Something went wrong",
+        message: "Something went wrong, please try again",
       });
     }
   }
@@ -160,48 +160,48 @@ export class BucketController {
 
   //************FILE-CRUD-API**************** */
 
-  @Put('upload/:bucketId') // create a new file upload to given bucket
+  @Put("upload/:bucketId") // create a new file upload to given bucket
   @ApiBearerAuth()
-  @ApiConsumes('multipart/form-data')
+  @ApiConsumes("multipart/form-data")
   @UseInterceptors(
-    FileInterceptor('file', {
+    FileInterceptor("file", {
       storage: diskStorage({
-        destination: './uploads',
+        destination: "./uploads",
         filename: (req, file, cb) => {
           const randomName = Array(32)
             .fill(null)
             .map(() => Math.round(Math.random() * 16).toString(16))
-            .join('');
+            .join("");
           cb(null, `${randomName}${extname(file.originalname)}`);
         },
       }),
-    }),
+    })
   )
   @ApiBody({
-    description: 'File upload',
+    description: "File upload",
     required: true,
-    type: 'multipart/form-data',
+    type: "multipart/form-data",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
         file: {
-          type: 'string',
-          format: 'binary',
+          type: "string",
+          format: "binary",
         },
       },
     },
   })
   async uploadFile(
-    @Param('bucketId') bucketId: string,
+    @Param("bucketId") bucketId: string,
     @UploadedFile() file: MulterFile,
-    @Res() res: any,
+    @Res() res: any
   ) {
-    const filePath = join(__dirname, '../../uploads', file.filename);
+    const filePath = join(__dirname, "../../uploads", file.filename);
     console.log(filePath);
     const response = await this.bucketService.uploadFile(
       bucketId,
       file,
-      filePath,
+      filePath
     );
     switch (response.status) {
       case 200:
@@ -221,35 +221,77 @@ export class BucketController {
       default:
         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
           status: 500,
-          error: 'Something went wrong',
-          message: 'Something went wrong, please try again',
+          error: "Something went wrong",
+          message: "Something went wrong, please try again",
           data: null,
         });
     }
   }
 
-  @Delete('/:fileId') // delete file from the bucket
+  @Delete("file/:fileId") // delete file from the bucket
   @ApiBearerAuth()
-  async deleteFile(@Param('fileId') fileId: string, @Res() res) {
+  async deleteFile(@Param("fileId") fileId: string, @Res() res) {
     const file = await this.bucketService.deleteFile(fileId);
     res.sendFile(file.filePath);
   }
 
-  @Get('/:fileId') // get file from the bucket by ID
+  @Get("file/:fileId") // get file from the bucket by fileID
   @ApiBearerAuth()
-  async getFileById(@Param('fileId') fileId: string, @Res() res) {
-    const response = await this.bucketService.getFileById(fileId);
-    if (response.status === 400) {
-      return res.status(400).send(response.message);
+  async getFileById(@Param("fileId") fileId: string, @Res() res, @Req() req: any) {
+    const userId = req.headers["userId"];
+    const response = await this.bucketService.getFileByFileId(fileId, userId);
+    switch (response.status) {
+      case 200:
+        return res.status(HttpStatus.OK).json({
+          status: response.status,
+          error: response.error,
+          message: response.message,
+          data: response.data,
+        });
+      case 400:
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          error: response.error,
+          message: response.message,
+          status: response.status,
+          data: response.data,
+        });
+      default:
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+          status: 500,
+          error: "Something went wrong",
+          message: "Something went wrong, please try again",
+          data: null,
+        });
     }
-    res.sendFile(response.path);
   }
 
-  @Get('files/:bucketId') // get file from the bucket by bucket
+  @Get("getfile/:bucketId") // get file from the bucket by bucketID
   @ApiBearerAuth()
-  async getFileByBucketName(@Param('bucketId') bucketId: string, @Res() res) {
-    const file = await this.bucketService.getFileByBucketName(bucketId);
-    res.send(file);
+  async getFileByBucketName(@Param("bucketId") bucketId: string, @Res() res) {
+    const response = await this.bucketService.getFileByBucketId(bucketId);
+    switch (response.status) {
+      case 200:
+        return res.status(HttpStatus.OK).json({
+          status: response.status,
+          error: response.error,
+          message: response.message,
+          data: response.data,
+        });
+      case 400:
+        return res.status(HttpStatus.BAD_REQUEST).json({
+          error: response.error,
+          message: response.message,
+          status: response.status,
+          data: response.data,
+        });
+      default:
+        return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+          status: 500,
+          error: "Something went wrong",
+          message: "Something went wrong, please try again",
+          data: null,
+        });
+    }
   }
 
   //************END**************** */
